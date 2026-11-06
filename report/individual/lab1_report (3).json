@@ -1,0 +1,206 @@
+{
+ "seed": 8309,
+ "predictions": {
+  "ml_f1": {
+   "text": "F1 ~0.90, precision cao hơn recall vì bộ lọc thường ưu tiên độ chính xác để tránh chặn nhầm tin nhắn quan trọng (ham) của người dùng.",
+   "time": "18:55:39"
+  },
+  "ml_lr": {
+   "text": "lr=0.001 thì đường loss giảm rất chậm và không kịp hội tụ sau số epoch ít; lr=50 thì học quá nhanh khiến trọng số dao động mạnh, đường loss bị tăng vọt,không hội tụ.",
+   "time": "18:55:45"
+  },
+  "dl_curve": {
+   "text": "val loss không giảm mãi mà sẽ đạt điểm cực tiểu rồi có xu hướng tăng dần do overfitting; MLP sẽ đạt điểm F1 tốt hơn Logistic Regression nhờ khả năng học các mối quan hệ phi tuyến và tổ hợp từ phức tạp.",
+   "time": "18:56:23"
+  },
+  "dl_relu": {
+   "text": "Nếu xóa ReLU, mạng 2 lớp Linear sẽ thu gọn thành một phép biến đổi tuyến tính duy nhất (tương đương Logistic Regression), dẫn đến F1-score giảm do mất khả năng học phi tuyến.",
+   "time": "18:56:33"
+  },
+  "emb_search": {
+   "text": "spam",
+   "time": "18:57:12"
+  },
+  "emb_tricky": {
+   "text": "Encoder + LogReg đoán đúng nhiều hơn vì mô hình Embedding nắm bắt được ý nghĩa ngữ nghĩa của câu, nhận diện được các tin nhắn ngụy trang né từ khóa spam nhưng mang ý nghĩa quảng cáo/lừa đảo; trong khi mô hình BoW chỉ đếm từ khóa thô nên dễ bị đánh lừa.",
+   "time": "18:57:19"
+  },
+  "llm_models": {
+   "text": "(1) Model lớn (gpt-6.1-terra) F1 cao hơn một chút, khoảng +0.02–0.05 (vd ~0.93 vs ~0.89). Cả hai đều làm tốt vì spam SMS khá rõ dấu hiệu; model nhỏ hay nhầm ở tin ham có giọng quảng cáo/thông báo dịch vụ → precision thấp hơn. Với chỉ 40 tin, sai 1 tin đã lệch F1 vài điểm nên chênh lệch có thể ~0. (2) Số token gần như bằng nhau nên tỉ lệ chi phí ≈ tỉ lệ giá trong PRICE_PER_1M, đoán model lớn đắt gấp ~5–10 lần. Model lớn cũng chậm hơn. (3) LLM zero-shot KHÔNG thắng rõ mô hình 3b (embedding + classifier đã huấn luyện): 3b học từ dữ liệu có nhãn nên F1 ngang hoặc cao hơn, lại rẻ và nhanh hơn rất nhiều mỗi tin.",
+   "time": "20:23:57"
+  },
+  "llm_fewshot": {
+   "text": "F1 tăng nhẹ (~+0.02), giảm nhầm ham→spam. Chi phí mỗi tin tăng ~2 lần vì prompt dài gấp đôi, output vẫn 1 từ.",
+   "time": "20:29:30"
+  },
+  "tradeoff": {
+   "text": "Pareto: TF-IDF (nhanh nhất) và embedding 3b (ít lỗi nhất); LLM chậm mà không ít lỗi hơn nên bị lấn át. Bên phải SLA 50 ms: mọi cách gọi LLM qua API (~0.3–2 s), và cả 3b nếu tính embedding qua API.",
+   "time": "20:39:28"
+  },
+  "hard_eval": {
+   "text": "Còn khoảng 80%,Nhóm Natural_spam khó nhất với BoW,Prompt_Injection khó nất với LLM",
+   "time": "20:51:49"
+  }
+ },
+ "checks": {
+  "1.1 vectorize": true,
+  "1.2 sigmoid / predict_proba": true,
+  "1.3 train_logreg": true,
+  "1.4 metrics": true,
+  "2.1 build_mlp": true,
+  "2.2 train_mlp": true,
+  "3.1–3.2 cosine / top_k_similar": true,
+  "3.3 knn_predict": true,
+  "4.2–4.3 prompt / parse_label": true,
+  "4.1 + 4.4 call_openai / llm_classify_batch": true
+ },
+ "experiments": [
+  {
+   "key": "ml_f1",
+   "time": "18:55:39"
+  },
+  {
+   "key": "ml_lr",
+   "time": "18:55:45"
+  },
+  {
+   "key": "dl_curve",
+   "time": "18:56:23"
+  },
+  {
+   "key": "dl_relu",
+   "time": "18:56:33"
+  },
+  {
+   "key": "emb_search",
+   "time": "18:57:13"
+  },
+  {
+   "key": "emb_tricky",
+   "time": "18:57:19"
+  },
+  {
+   "key": "llm_models",
+   "time": "20:23:59"
+  },
+  {
+   "key": "llm_models",
+   "time": "20:26:01"
+  },
+  {
+   "key": "llm_fewshot",
+   "time": "20:29:31"
+  },
+  {
+   "key": "tradeoff",
+   "time": "20:39:29"
+  },
+  {
+   "key": "hard_eval",
+   "time": "20:51:52"
+  },
+  {
+   "key": "hard_eval",
+   "time": "21:04:03"
+  }
+ ],
+ "challenge": 5,
+ "results": {
+  "1. BoW + LogReg (tự code)": {
+   "accuracy": 0.9638709677419355,
+   "precision": 1.0,
+   "recall": 0.7477477477477478,
+   "f1": 0.8556701030927836,
+   "f1_SUB": 0.8235294117647058,
+   "train_s": 4.8427434599999515,
+   "msg_per_s": 20410.86894837288,
+   "p50_ms": 0.04812000000242733,
+   "p95_ms": 0.08281554999598476,
+   "usd_per_1k": 0.0
+  },
+  "2. BoW + MLP (deep learning)": {
+   "accuracy": 0.9741935483870968,
+   "precision": 1.0,
+   "recall": 0.8198198198198198,
+   "f1": 0.9009900990099009,
+   "f1_SUB": 0.787878787878788,
+   "train_s": 9.177589592000004,
+   "msg_per_s": 9361.245951640956,
+   "p50_ms": 0.23898999998550607,
+   "p95_ms": 8.308997799986173,
+   "usd_per_1k": 0.0
+  },
+  "3a. Encoder (MiniLM) + kNN": {
+   "accuracy": 0.967741935483871,
+   "precision": 0.8524590163934426,
+   "recall": 0.9369369369369369,
+   "f1": 0.8927038626609443,
+   "f1_SUB": 0.9743589743589743,
+   "train_s": 2.791776447000018,
+   "msg_per_s": 282.0085517423061,
+   "p50_ms": 11.308462000016561,
+   "p95_ms": 13.673390700026252,
+   "usd_per_1k": 0.0
+  },
+  "3b. Encoder (MiniLM) + LogReg": {
+   "accuracy": 0.984516129032258,
+   "precision": 0.9805825242718447,
+   "recall": 0.9099099099099099,
+   "f1": 0.9439252336448598,
+   "f1_SUB": 0.9473684210526316,
+   "train_s": 3.1312344810000354,
+   "msg_per_s": 1244.1032775432016,
+   "p50_ms": 6.666710500013551,
+   "p95_ms": 8.119013749973188,
+   "usd_per_1k": 0.0
+  },
+  "3c. Encoder (MiniLM) + MLP head": {
+   "accuracy": 0.9883870967741936,
+   "precision": 1.0,
+   "recall": 0.918918918918919,
+   "f1": 0.9577464788732395,
+   "f1_SUB": 0.9473684210526316,
+   "train_s": 3.8593393600000354,
+   "msg_per_s": 1574.398008251169,
+   "p50_ms": 6.798390999989579,
+   "p95_ms": 7.36102134999328,
+   "usd_per_1k": 0.0
+  },
+  "4a. LLM nhỏ zero-shot": {
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0,
+   "f1_SUB": 1.0,
+   "train_s": 0.0,
+   "msg_per_s": 1.3805965071528883,
+   "p50_ms": 675.6285444998866,
+   "p95_ms": 1093.320130000211,
+   "usd_per_1k": 0.012563333333333334
+  },
+  "4b. LLM lớn zero-shot": {
+   "accuracy": 0.975,
+   "precision": 1.0,
+   "recall": 0.95,
+   "f1": 0.9743589743589743,
+   "f1_SUB": 0.9743589743589743,
+   "train_s": 0.0,
+   "msg_per_s": 0.8631039792546704,
+   "p50_ms": 1064.7416864994739,
+   "p95_ms": 1691.1134256495184,
+   "usd_per_1k": 0.5025333333333333
+  },
+  "4c. LLM nhỏ few-shot": {
+   "accuracy": 0.975,
+   "precision": 1.0,
+   "recall": 0.95,
+   "f1": 0.9743589743589743,
+   "f1_SUB": 0.9743589743589743,
+   "train_s": 0.0,
+   "msg_per_s": 1.3659941526211974,
+   "p50_ms": 688.8362769996093,
+   "p95_ms": 925.4776833496629,
+   "usd_per_1k": 0.02456333333333333
+  }
+ }
+}
